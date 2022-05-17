@@ -64,3 +64,53 @@ const posts = [
 // 1. Formattare le date in formato italiano (gg/mm/aaaa)
 // 2. Gestire l'assenza dell'immagine profilo con un elemento di fallback che contiene le iniziali dell'utente (es. Luca Formicola > LF).
 // 3. Al click su un pulsante "Mi Piace" di un post, se abbiamo già cliccato dobbiamo decrementare il contatore e cambiare il colore del bottone.
+
+const likedPosts = [];
+
+const container = document.querySelector("#container");
+for (let i = 0; i < posts.length; i++) {
+    const post = document.querySelector("#tpl").content.cloneNode(true);
+    if (!posts[i].author.image) {
+        const img = post.querySelector(".post-meta__icon img");
+        img.parentElement.removeChild(img);
+        const div = document.createElement("div");
+        div.classList.add("profile-pic", "profile-pic-default");
+        const span = document.createElement("span");
+        const splitedName = posts[i].author.name.split(" ");
+        span.innerHTML = splitedName[0][0] + splitedName[1][0];
+        div.append(span);
+        post.querySelector(".post-meta__icon").appendChild(div);
+    } else {
+        post.querySelector(".post-meta__icon img").src = posts[i].author.image;
+        post.querySelector(".post-meta__icon img").alt = posts[i].author.name;
+    }
+    post.querySelector(".post-meta__author").innerHTML = posts[i].author.name;
+    post.querySelector(".post__text").innerHTML = posts[i].content;
+    post.querySelector(".post__image img").src = posts[i].media;
+    post.querySelector(".like-button").setAttribute("data-postid", posts[i].id);
+    post.querySelector(".js-likes-counter").innerHTML = posts[i].likes;
+    const date = posts[i].created.split("-").reverse().join("/");
+    post.querySelector(".post-meta__time").innerHTML = date;
+    container.append(post);
+}
+
+const postElements = document.querySelectorAll(".post");
+
+for (let i = 0; i < postElements.length; i++) {
+    const post = postElements[i];
+    const likeButton = post.querySelector(".like-button");
+    const likeCounter = post.querySelector(".js-likes-counter");
+    const postId = likeButton.getAttribute("data-postid");
+    likeButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (likeButton.classList.contains("like-button--liked")) {
+        likedPosts = likedPosts.filter((id) => id !== postId);
+        this.classList.remove("like-button--liked");
+        likeCounter.innerHTML--;
+    } else {
+        likedPosts.push(postId);
+        this.classList.add("like-button--liked");
+        likeCounter.innerHTML++;
+    }
+});
+}
